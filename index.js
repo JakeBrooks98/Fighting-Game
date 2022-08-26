@@ -25,6 +25,7 @@ class Sprite {
         }
         this.color = color
         this.isAttacking
+        this.health = 100
     }
     draw() {
         c.fillStyle = this.color
@@ -51,7 +52,7 @@ class Sprite {
     attack() {
         this.isAttacking = true
         setTimeout(() => {
-            this.isAttacking =false
+            this.isAttacking = false
         }, 100)
     }
 }
@@ -103,7 +104,7 @@ const keys = {
     }
 }
 
-function rectangularCollision({rectangle1, rectangle2}) {
+function rectangularCollision({ rectangle1, rectangle2 }) {
     return (rectangle1.attackBox.position.x + rectangle1.attackBox.width >= rectangle2.position.x
         && rectangle1.attackBox.position.x <= rectangle2.position.x + rectangle2.width
         && rectangle1.attackBox.position.y + rectangle1.attackBox.height >= rectangle2.position.y
@@ -121,26 +122,40 @@ function animate() {
     enemy.velocity.x = 0
 
     //player movement
-    if(keys.a.pressed && player.lastKey === 'a') {
+    if (keys.a.pressed && player.lastKey === 'a') {
         player.velocity.x = -5
-    } else if (keys.d.pressed && player.lastKey ==='d'){
+    } else if (keys.d.pressed && player.lastKey === 'd') {
         player.velocity.x = 5
     }
 
     //enemy movement
-    if(keys.ArrowLeft.pressed && enemy.lastKey === 'ArrowLeft') {
+    if (keys.ArrowLeft.pressed && enemy.lastKey === 'ArrowLeft') {
         enemy.velocity.x = -5
-    } else if (keys.ArrowRight.pressed && enemy.lastKey ==='ArrowRight'){
+    } else if (keys.ArrowRight.pressed && enemy.lastKey === 'ArrowRight') {
         enemy.velocity.x = 5
     }
 
     //detect for collision
-    if(player.attackBox.position.x + player.attackBox.width >= enemy.position.x
-        && player.attackBox.position.x <= enemy.position.x + enemy.width
-        && player.attackBox.position.y + player.attackBox.height >= enemy.position.y
-        && player.attackBox.position.y <= enemy.position.y + enemy.height &&
+    if (
+        rectangularCollision({
+            rectangle1: player,
+            rectangle2: enemy
+        }) &&
         player.isAttacking) {
-            player.isAttacking = false
+        player.isAttacking = false
+        enemy.health -= 20
+        document.querySelector('#enemyHealth').style.width = enemy.health + '%'
+    }
+
+    if (
+        rectangularCollision({
+            rectangle1: enemy,
+            rectangle2: player
+        }) &&
+        enemy.isAttacking) {
+        enemy.isAttacking = false
+        player.health -= 20
+        document.querySelector('#playerHealth').style.width = player.health + '%'
     }
 }
 
@@ -151,29 +166,32 @@ window.addEventListener('keydown', (event) => {
         case 'd':
             keys.d.pressed = true
             player.lastKey = 'd'
-        break
+            break
         case 'a':
             keys.a.pressed = true
             player.lastKey = 'a'
-        break
+            break
         case 'w':
             player.velocity.y = -20
-        break
+            break
         case ' ':
             player.attack()
-        break
+            break
 
         case 'ArrowRight':
             keys.ArrowRight.pressed = true
             enemy.lastKey = 'ArrowRight'
-        break
+            break
         case 'ArrowLeft':
             keys.ArrowLeft.pressed = true
             enemy.lastKey = 'ArrowLeft'
-        break
+            break
         case 'ArrowUp':
             enemy.velocity.y = -20
-        break
+            break
+        case 'ArrowDown':
+            enemy.attack()
+            break
     }
 })
 
@@ -181,19 +199,19 @@ window.addEventListener('keyup', (event) => {
     switch (event.key) {
         case 'd':
             keys.d.pressed = false
-        break
+            break
         case 'a':
             keys.a.pressed = false
-        break
+            break
     }
 
     //enemy keys
     switch (event.key) {
         case 'ArrowRight':
             keys.ArrowRight.pressed = false
-        break
+            break
         case 'ArrowLeft':
             keys.ArrowLeft.pressed = false
-        break
+            break
     }
 })
